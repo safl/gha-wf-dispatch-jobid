@@ -1,0 +1,96 @@
+---
+name: jazz
+
+on:
+  pull_request:
+    branches:
+    - main
+    - next
+    - dev*
+    - ci*
+  push:
+    branches:
+    - main
+    - next
+    - dev*
+    - ci*
+    tags:
+    - v*
+  workflow_dispatch:
+    inputs:
+      description: 'Reason'
+      required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  source-job01:
+    runs-on: ubuntu-20.04
+    container: refenv/alpine-bash
+
+    steps:
+    - name: Do something with the source
+      run: echo "Hello"
+
+  source-job02:
+    runs-on: ubuntu-20.04
+    container: refenv/alpine-bash
+
+    steps:
+    - name: Do a pre-flight check on source
+      run: echo "Hello"
+
+  analyze-job01:
+    needs: source-job01
+    runs-on: ubuntu-latest
+    container: refenv/alpine-bash
+    if: ((! contains(github.ref, 'ci')) || contains(github.ref, 'ci-analyze-job01')) && (github.event_name == 'push')
+
+    steps:
+    - name: Analyze something
+      run: echo "Hello"
+
+  analyze-job2:
+    needs: source-job01
+    runs-on: ubuntu-latest
+    container: refenv/alpine-bash
+    if: ((! contains(github.ref, 'ci')) || contains(github.ref, 'ci-analyze-job2')) && (github.event_name == 'push')
+
+    steps:
+    - name: Analyze something
+      run: echo "Hello"
+
+  build-job1:
+    needs: [source-job1, source-job02]
+    runs-on: ubuntu-latest
+    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job01')
+
+    container: refenv/alpine-bash
+
+    steps:
+    - name: Build something
+      run: echo "Hello"
+
+  build-job2:
+    needs: [source-job1, source-job02]
+    runs-on: ubuntu-latest
+    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job02')
+
+    container: refenv/alpine-bash
+
+    steps:
+    - name: Build something else
+      run: echo "Hello"
+
+  build-job3:
+    needs: [source-job1, source-job02]
+    runs-on: ubuntu-latest
+    container: refenv/alpine-bash
+    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job03')
+
+    steps:
+    - name: Build yet another thing
+      run: echo "Hello"
