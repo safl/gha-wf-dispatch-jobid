@@ -2,24 +2,29 @@
 name: jazz
 
 on:
-  pull_request:
-    branches:
-    - main
-    - next
-    - dev*
-    - ci*
   push:
     branches:
-    - main
-    - next
-    - dev*
-    - ci*
+    - '*'
     tags:
-    - v*
+    - '*'
+  pull_request:
+    branches:
+    - '*'
   workflow_dispatch:
     inputs:
-      description: 'Reason'
-      required: false
+      job:
+        description: 'Job'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - 'all'
+        - 'docgen'
+        - 'analyze-job01'
+        - 'analyze-job02'
+        - 'build-job01'
+        - 'build-job02'
+        - 'build-job03'
 
 defaults:
   run:
@@ -33,7 +38,7 @@ jobs:
 
     steps:
     - name: Do something with the source
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
   source-job02:
     runs-on: ubuntu-20.04
@@ -41,56 +46,54 @@ jobs:
 
     steps:
     - name: Do a pre-flight check on source
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
   analyze-job01:
     needs: source-job01
     runs-on: ubuntu-latest
     container: refenv/alpine-bash
-    if: ((! contains(github.ref, 'ci')) || contains(github.ref, 'ci-analyze-job01')) && (github.event_name == 'push')
+    if: (github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job))
 
     steps:
     - name: Analyze something
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
   analyze-job2:
     needs: source-job01
     runs-on: ubuntu-latest
     container: refenv/alpine-bash
-    if: ((! contains(github.ref, 'ci')) || contains(github.ref, 'ci-analyze-job2')) && (github.event_name == 'push')
+    if: (github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job))
 
     steps:
     - name: Analyze something
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
-  build-job1:
-    needs: [source-job1, source-job02]
+  build-job01:
+    needs: [source-job01, source-job02]
     runs-on: ubuntu-latest
-    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job01')
-
     container: refenv/alpine-bash
+    if: (github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job))
 
     steps:
     - name: Build something
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
-  build-job2:
-    needs: [source-job1, source-job02]
+  build-job02:
+    needs: [source-job01, source-job02]
     runs-on: ubuntu-latest
-    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job02')
-
     container: refenv/alpine-bash
+    if: (github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job))
 
     steps:
     - name: Build something else
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
 
-  build-job3:
-    needs: [source-job1, source-job02]
+  build-job03:
+    needs: [source-job01, source-job02]
     runs-on: ubuntu-latest
     container: refenv/alpine-bash
-    if: (! contains(github.ref, 'ci')) || contains(github.ref, 'ci-build-job03')
+    if: (github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job))
 
     steps:
     - name: Build yet another thing
-      run: echo "Hello"
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
