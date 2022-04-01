@@ -1,0 +1,77 @@
+---
+name: jazz
+
+on:
+  push:
+    branches:
+    - '*'
+    tags:
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Job'
+        required: true
+        default: all
+        type: choice
+        options:
+        - all
+        - analyze
+        - build
+        - test
+        - docs
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  source:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Workflow Dispatch, dump inputs
+      run: |
+        echo "github.job: '${{ github.job }}'"
+        echo "github.event.inputs.job: '${{ github.event.inputs.job }}'"
+
+  analyze:
+    name: 'analyze'
+    needs: source
+    runs-on: ubuntu-latest
+    if: ((github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (contains(github.job, github.event.inputs.job))))
+
+    steps:
+    - name: Analyze something
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
+
+  build:
+    needs: source
+    runs-on: ubuntu-latest
+    if: ((github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == github.event.inputs.job)))
+
+    steps:
+    - name: Build something
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
+
+  test:
+    needs: source
+    runs-on: ubuntu-latest
+    if: ((github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.event.inputs.job == 'test')))
+
+    steps:
+    - name: Build something
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
+
+  docs:
+    needs: source
+    runs-on: ubuntu-latest
+    if: ((github.event_name == 'workflow_dispatch') && ((github.event.inputs.job == 'all') || (github.job == 'docs')))
+
+    steps:
+    - name: Generate some docs
+      run: echo "Hello '${{ github.job }}' '${{ github.event.inputs.job }}'"
