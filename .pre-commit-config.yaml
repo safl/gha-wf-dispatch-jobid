@@ -1,0 +1,21 @@
+---
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: check-yaml
+    name: YAML-format-check
+    types: [yaml]
+- repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+  rev: 0.1.0
+  hooks:
+  - id: yamlfmt
+    name: YAML-format
+    args:
+    - '--mapping=2'
+    - '--sequence=2'
+    - '--offset=0'
+    - '--width=120'
+    - '--preserve-quotes'
+    types: [yaml]
